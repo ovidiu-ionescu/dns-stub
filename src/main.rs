@@ -35,6 +35,25 @@ fn read(buf: &[u8], start: usize) -> usize {
     u16::from_be_bytes([buf[start], buf[start + 1]]) as usize
 }
 
+fn extract_name(buf: &[u8], start: usize) -> String {
+    let mut res = String::new();
+    let mut crt = start;
+    let mut len = buf[start] as usize;
+    while len > 0 {
+        if len >= 192 {
+            crt = u16::from_be_bytes([(len - 192) as u8, buf[crt + 1]]) as usize;
+            len = buf[crt] as usize;
+        }
+        res.push_str(std::str::from_utf8(&buf[crt + 1..=crt + len]).unwrap());
+        crt += len + 1;
+        len = buf[crt] as usize;
+        if len != 0 {
+            res.push('.');
+        }
+    }
+    res
+}
+
 fn server(ip: &str, port: u16, response_ip: &str) {
     let address = format!("{ip}:{port}");
     info!("Starting server on {}", address);
@@ -58,20 +77,29 @@ fn server(ip: &str, port: u16, response_ip: &str) {
         // toggle the QR bit
         buf[2] ^= 0b10000000;
 
-        // for adding to the end of the buffer
-        let mut ptr = amt;
-
         // get number of additional records
         let additional_records = read(&buf, 10);
         // set additional records to 0
         write(0, &mut buf, 10);
         if additional_records > 0 {
             debug!("Additional records: {}", additional_records);
-            ptr -= 11;
         }
+
+        let name = extract_name(&buf, 12);
+        // for adding to the end of the buffer
+        let mut ptr = 12 + name.len() + 6;
+        debug!("Payload should end at {}", ptr);
 
         // get the query type
         let qtype = read(&buf, ptr - 4);
+        info!(
+            "Query for {} of type {} ({}), addtional records: {}",
+            name,
+            qtype,
+            if qtype == 1 { "A" } else { "other" },
+            additional_records
+        );
+
         if qtype != 1 {
             debug!("Not a query for A record");
             buf[7] = 0;
@@ -116,7 +144,7 @@ fn server(ip: &str, port: u16, response_ip: &str) {
         counter += 1;
 
         server_socket
-            .send_to(&buf[..ptr], &src)
+            .send_to(&buf[..ptr], src)
             .expect("Failed to send packet");
     }
 }
@@ -128,6 +156,7 @@ pub const CAP_NET_BIND_SERVICE: c_int = 10;
 
 /// This will only work if the process has CAP_SETPCAP capability.
 /// Dropping capabilities also needs to be allowed, it's not implicit
+#[allow(dead_code)]
 fn drop_capabilities() -> Result<(), String> {
     let ret = unsafe { prctl(PR_CAPBSET_DROP, CAP_NET_BIND_SERVICE, 0, 0, 0) };
     if ret != 0 {
