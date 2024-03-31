@@ -18,10 +18,10 @@ server:
 resolvectl domain dns-stub test.mydomain.com
 ```
 
-After that start the server passing in the command line the IP address of the 
+After that, start the server passing in the command line the IP address of the 
 dummy interface and the address it should return in the DNS answers.
 
-The [ruh.sh](run.sh) script instructs it to return the address of a running 
+The [run.sh](run.sh) script instructs it to return the address of a running 
 minikube instance.
 
 If the logging is set to level debug `RUST_LOG=debug` the program will save in 

@@ -17,6 +17,9 @@ struct Args {
 
     #[arg(short, long)]
     demonize: bool,
+
+    #[arg(short, long)]
+    update_allowed: bool,
 }
 
 fn main() {
@@ -54,12 +57,13 @@ fn extract_name(buf: &[u8], start: usize) -> String {
     res
 }
 
-fn server(ip: &str, port: u16, response_ip: &str) {
+fn server(ip: &str, port: u16, initial_response_ip: &str) {
     let address = format!("{ip}:{port}");
     info!("Starting server on {}", address);
     let server_socket = UdpSocket::bind(address).expect("Could not bind server socket");
     //drop_capabilities().expect("Failed to drop capabilities");
     let mut counter = 0;
+    let mut response_ip = initial_response_ip.to_string();
 
     loop {
         let mut buf = [0; 512];
@@ -93,17 +97,19 @@ fn server(ip: &str, port: u16, response_ip: &str) {
         // get the query type
         let qtype = read(&buf, ptr - 4);
         info!(
-            "Query for {} of type {} ({}), addtional records: {}",
+            "Query for {} of type {} ({}), additional records: {}",
             name,
             qtype,
             if qtype == 1 { "A" } else { "other" },
             additional_records
         );
+        if qtype == 23 {
+            response_ip = name;
+            info!("Setting response IP to {}", response_ip);
+        }
 
-        if qtype != 1 {
-            debug!("Not a query for A record");
-            buf[7] = 0;
-        } else {
+        match qtype {
+        1 | 23 => {
             // set the answer count to 1
             buf[7] = 1;
 
@@ -135,6 +141,11 @@ fn server(ip: &str, port: u16, response_ip: &str) {
                 buf[ptr] = n;
                 ptr += 1;
             });
+        }
+        _ => {
+            debug!("Unsuported query type");
+            buf[7] = 0;
+          }
         }
 
         if log_enabled!(Level::Debug) {
