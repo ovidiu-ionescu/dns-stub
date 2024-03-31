@@ -1,13 +1,17 @@
 use clap::Parser;
-use log::{debug, info, log_enabled, Level};
+use log::{debug, info, warn, log_enabled, Level};
 use std::io::Write;
 use std::net::UdpSocket;
+use std::net::IpAddr;
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
 struct Args {
     #[arg(short, long)]
     ip: String,
+
+    #[arg(short = 's', long, default_value = "simulacron.eu")]
+    domain_suffix: String,
 
     #[arg(short, long, default_value_t = 53)]
     port: u16,
@@ -25,7 +29,7 @@ struct Args {
 fn main() {
     let args = Args::parse();
     env_logger::init();
-    server(&args.ip, args.port, &args.response_ip);
+    server(&args.ip, args.port, &args.response_ip, &args.domain_suffix);
 }
 
 fn write(n: u16, vec: &mut [u8], index: usize) {
@@ -57,7 +61,7 @@ fn extract_name(buf: &[u8], start: usize) -> String {
     res
 }
 
-fn server(ip: &str, port: u16, initial_response_ip: &str) {
+fn server(ip: &str, port: u16, initial_response_ip: &str, domain_suffix: &str) {
     let address = format!("{ip}:{port}");
     info!("Starting server on {}", address);
     let server_socket = UdpSocket::bind(address).expect("Could not bind server socket");
@@ -96,20 +100,36 @@ fn server(ip: &str, port: u16, initial_response_ip: &str) {
 
         // get the query type
         let qtype = read(&buf, ptr - 4);
+        // for better logging, decide now if we are going to respond
+        let will_respond = (qtype == 1 || qtype == 23) && name.ends_with(domain_suffix);
         info!(
-            "Query for {} of type {} ({}), additional records: {}",
+            "Query for {} of type {} ({}), additional records: {} | will respond: {will_respond}",
             name,
             qtype,
             if qtype == 1 { "A" } else { "other" },
             additional_records
         );
         if qtype == 23 {
-            response_ip = name;
-            info!("Setting response IP to {}", response_ip);
+          // we are changing the response IP
+          // if just the IP is sent, we will use it as the response IP
+          match name.parse::<IpAddr>() {
+            Ok(ip) => {
+              if ip.is_ipv4() {
+                response_ip = name.clone();
+                info!("Setting response IP to {}", response_ip);
+              } else {
+                warn!("Invalid IPv4 address: 「{name}」");
+              }
+            }
+            Err(_) => {
+              warn!("Invalid IP address: 「{name}」");
+            }
+          }
         }
 
         match qtype {
-        1 | 23 => {
+        1 | 23 if name.ends_with("simulacron.eu") => {
+          info!("Responding with IP {response_ip}");
             // set the answer count to 1
             buf[7] = 1;
 
@@ -143,7 +163,7 @@ fn server(ip: &str, port: u16, initial_response_ip: &str) {
             });
         }
         _ => {
-            debug!("Unsuported query type");
+            debug!("Unsuported query type, set answer count to 0");
             buf[7] = 0;
           }
         }

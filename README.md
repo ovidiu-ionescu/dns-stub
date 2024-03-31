@@ -15,13 +15,17 @@ This functionality is implemented in
 Further on, you can assign some domains for split DNS to resolve through this
 server:
 ```bash
-resolvectl domain dns-stub test.mydomain.com
+sudo resolvectl domain dns-stub test.mydomain.com
+```
+A helper script is also provided:
+```bash
+scripts/resolve_dns.sh
 ```
 
 After that, start the server passing in the command line the IP address of the 
 dummy interface and the address it should return in the DNS answers.
 
-The [run.sh](run.sh) script instructs it to return the address of a running 
+The [run-with-minikube.sh](run-with-minikube.sh) script instructs it to return the address of a running 
 minikube instance.
 
 If the logging is set to level debug `RUST_LOG=debug` the program will save in 
