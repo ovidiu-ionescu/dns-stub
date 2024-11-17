@@ -2,7 +2,7 @@
 # Creates a dummy network interface for local testing
 
 SUDO=''
-if (( $EUID != 0 )); then
+if (( EUID != 0 )); then
     SUDO='sudo'
 fi
 
