@@ -1,0 +1,4 @@
+[NetDev]
+Name=dns-stub
+Kind=dummy
+

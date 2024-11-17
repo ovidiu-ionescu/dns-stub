@@ -1,0 +1,10 @@
+[Unit]
+Description=DNS Stub Service
+After=network.target dns-stub.target
+
+[Service]
+ExecStart=/usr/local/bin/dns-stub -i 192.168.0.10 -p 53 -r 192.168.0.100
+
+[Install]
+WantedBy=multi-user.target
+
