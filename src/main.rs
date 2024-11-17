@@ -131,9 +131,7 @@ fn server(ip: &str, port: u16, initial_response_ip: &str, domain_suffix: &str) {
           warn!("Failed to parse name: {}", e);
           &default_response_ip
         }
-        _ => {
-          &default_response_ip
-        }
+        _ => &default_response_ip,
       },
       // Regular query
       1 => match parsed_name {
@@ -143,19 +141,15 @@ fn server(ip: &str, port: u16, initial_response_ip: &str, domain_suffix: &str) {
           } else {
             &default_response_ip
           }
-        },
+        }
         Err(e) => {
           warn!("Failed to parse name {e}");
           &default_response_ip
-        },
-        _ => {
-          &default_response_ip
         }
+        _ => &default_response_ip,
       },
 
-      _ => {
-          &default_response_ip
-      }
+      _ => &default_response_ip,
     };
 
     match qtype {
