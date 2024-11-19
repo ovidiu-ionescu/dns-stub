@@ -11,6 +11,10 @@ To create it without rebooting run
 ```bash
 sudo systemctl restart systemd-networkd
 ```
+Enable the systemd-networkd service
+```bash
+sudo systemctl enable systemd-networkd
+```
 
 Prepare the binary for the service
 ```bash
@@ -29,7 +33,7 @@ To start the service run
 Reload stuff
 ```bash
 sudo systemctl daemon-reload
-sudo systemctl start dummy.service
-sudo systemctl enable dummy.service
+sudo systemctl start dns-stub.service
+sudo systemctl enable dns-stub.service
 ```
 
