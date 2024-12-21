@@ -1,7 +1,8 @@
 # dns-stub
 
-This program acts as a DNS server that resolves all A queries it receives with 
-the same IP address.
+This program acts as a DNS server that resolves A queries. It starts with a default IP
+address for every request but you can dynamically add other IP addresses using requests
+of type 23.
 
 It is meant to be used for testing with split DNS resolving, like for instance
 `systemd-resolved`
@@ -31,3 +32,6 @@ minikube instance.
 If the logging is set to level debug `RUST_LOG=debug` the program will save in 
 files all the requests and responses.
 
+## Docker containers
+Normally Docker containers are assigned a dynamic address when they are started. Using this server
+you could add their IP address in the DNS server and resolve them via regular names.
