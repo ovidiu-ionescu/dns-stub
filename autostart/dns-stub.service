@@ -3,8 +3,9 @@ Description=DNS Stub Service
 After=network.target dns-stub.target
 
 [Service]
-ExecStart=/usr/local/bin/dns-stub -i 192.168.0.10 -p 53 -r 192.168.0.100
+ExecStart=/usr/local/bin/dns-stub -i 192.168.0.10 -p 53 -r 192.168.200.200
+ExecStartPre=/usr/bin/bash -c 'until ip addr show | grep -q "192.168.0.10"; do sleep 1; done'
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=default.target
 

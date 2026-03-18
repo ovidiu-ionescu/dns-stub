@@ -20,5 +20,18 @@ query:
 update:
   dig @{{IP_ADDRESS}} ceva.simulacron.eu:12.13.14.15 -t TYPE23
 
+# This will create the permanent services
+deploy:
+  cargo build --release
+  -sudo mv target/release/dns-stub /usr/local/bin/
+  sudo setcap 'cap_net_bind_service=+ep' /usr/local/bin/dns-stub
+  sudo cp autostart/10-dns-stub.netdev /etc/systemd/network/
+  sudo cp autostart/11-dns-stub.network /etc/systemd/network/
+  sudo cp autostart/dns-stub.service ~/.config/systemd/user/
+  sudo systemctl daemon-reload
+  sudo systemctl restart systemd-networkd
+  sudo systemctl enable systemd-networkd
+  systemctl --user enable dns-stub
+
 
 
