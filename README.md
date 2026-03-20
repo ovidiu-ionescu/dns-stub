@@ -35,3 +35,6 @@ files all the requests and responses.
 ## Docker containers
 Normally Docker containers are assigned a dynamic address when they are started. Using this server
 you could add their IP address in the DNS server and resolve them via regular names.
+
+## Autostart with systemd
+Follow instructions here: [autostart](AUTOSTART.md)

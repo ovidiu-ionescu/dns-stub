@@ -1,4 +1,4 @@
-# Make the dns-stub service persistent
+# Make the dns-stub service persistent using systemd
 
 We need to create a persistent dummy interface and a service to run the dns-stub binary.
 
