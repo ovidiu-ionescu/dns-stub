@@ -1,36 +1,16 @@
 mod parse_request;
+mod cli;
 
 use clap::Parser;
 use log::{debug, info, log_enabled, warn, Level};
+use std::collections::HashMap;
 use std::io::Write;
 use std::net::UdpSocket;
-
-#[derive(Parser)]
-#[command(author, version, about, long_about = None)]
-struct Args {
-  #[arg(short, long)]
-  ip: String,
-
-  #[arg(short = 's', long, default_value = "simulacron.eu")]
-  domain_suffix: String,
-
-  #[arg(short, long, default_value_t = 53)]
-  port: u16,
-
-  #[arg(short, long)]
-  response_ip: String,
-
-  #[arg(short, long)]
-  demonize: bool,
-
-  #[arg(short, long)]
-  update_allowed: bool,
-}
 
 fn main() {
   let args = Args::parse();
   env_logger::init();
-  server(&args.ip, args.port, &args.response_ip, &args.domain_suffix);
+  server(&args.ip, args.port, &args.response_ip, &args.domain_suffix, &args.mappings);
 }
 
 fn write(n: u16, vec: &mut [u8], index: usize) {
@@ -62,7 +42,7 @@ fn extract_name(buf: &[u8], start: usize) -> String {
   res
 }
 
-fn server(ip: &str, port: u16, initial_response_ip: &str, domain_suffix: &str) {
+fn server(ip: &str, port: u16, initial_response_ip: &str, domain_suffix: &str, mappings: &[Mapping]) {
   let address = format!("{ip}:{port}");
   info!("Starting server on {}", address);
   let server_socket = UdpSocket::bind(address).expect("Could not bind server socket");
@@ -70,7 +50,8 @@ fn server(ip: &str, port: u16, initial_response_ip: &str, domain_suffix: &str) {
   let mut counter = 0;
   let mut default_response_ip = initial_response_ip.to_string();
 
-  let mut database = std::collections::HashMap::<String, String>::new();
+  //let mut database = std::collections::HashMap::<String, String>::new();
+  let mut database: HashMap<String, String> = mappings.iter().map(|m| (m.domain.clone(), m.ip.to_string())).collect();
 
   loop {
     let mut buf = [0; 512];
@@ -203,6 +184,7 @@ fn server(ip: &str, port: u16, initial_response_ip: &str, domain_suffix: &str) {
   }
 }
 
+use crate::cli::{Args, Mapping};
 use crate::parse_request::{parse_name, Name};
 use libc::c_int;
 use libc::{prctl, PR_CAPBSET_DROP};

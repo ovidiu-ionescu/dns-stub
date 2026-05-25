@@ -12,7 +12,7 @@ down:
 run:
   cargo build
   sudo setcap 'cap_net_bind_service=+ep' target/debug/dns-stub
-  RUST_LOG=info cargo run -- -i {{IP_ADDRESS}} -p 53 -r {{RESPONSE}} -d
+  RUST_LOG=info cargo run -- -i {{IP_ADDRESS}} -p 53 -r {{RESPONSE}} -d mydb.lab=10.5.0.10
 
 query:
   dig @{{IP_ADDRESS}} -p 53 ceva.simulacron.eu
