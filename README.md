@@ -1,8 +1,15 @@
 # dns-stub
 
-This program acts as a DNS server that resolves A queries. It starts with a default IP
-address for every request but you can dynamically add other IP addresses using requests
-of type 23.
+This a DNS server for local development.
+
+Using a command that no longer has an official support, you can instruct the 
+server at runtime to resolve a specific domain name to a specific IP address.
+
+This way, it can be used to assign domain names to docker containers or other
+services running on some dummy network interface.
+
+Currently, it only supports A queries and has a default IP address it returns
+when the domain has not been assigned a specific address.
 
 It is meant to be used for testing with split DNS resolving, like for instance
 `systemd-resolved`
