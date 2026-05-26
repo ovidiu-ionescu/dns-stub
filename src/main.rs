@@ -1,8 +1,8 @@
-mod parse_request;
 mod cli;
+mod parse_request;
 
 use clap::Parser;
-use log::{debug, info, log_enabled, warn, Level};
+use log::{Level, debug, info, log_enabled, warn};
 use std::collections::HashMap;
 use std::io::Write;
 use std::net::UdpSocket;
@@ -185,9 +185,9 @@ fn server(ip: &str, port: u16, initial_response_ip: &str, domain_suffix: &str, m
 }
 
 use crate::cli::{Args, Mapping};
-use crate::parse_request::{parse_name, Name};
+use crate::parse_request::{Name, parse_name};
 use libc::c_int;
-use libc::{prctl, PR_CAPBSET_DROP};
+use libc::{PR_CAPBSET_DROP, prctl};
 
 pub const CAP_NET_BIND_SERVICE: c_int = 10;
 
