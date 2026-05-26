@@ -84,6 +84,7 @@ fn server(ip: &str, port: u16, initial_response_ip: &str, domain_suffix: &str, m
     // get the query type
     let qtype = read(&buf, ptr - 4);
     // for better logging, decide now if we are going to respond
+    // FIXME: looks like it was planned to only support a domain suffix, never materialized
     let will_respond = (qtype == 1 || qtype == 23) && name.ends_with(domain_suffix);
     info!(
       "Query for {} of type {} ({}), additional records: {} | will respond: {will_respond}",

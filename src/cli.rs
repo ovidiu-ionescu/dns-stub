@@ -14,6 +14,7 @@ pub struct Args {
   #[arg(short, long)]
   pub ip: String,
 
+  /// currently unused
   #[arg(short = 's', long, default_value = "simulacron.eu")]
   pub domain_suffix: String,
 
@@ -29,6 +30,7 @@ pub struct Args {
   #[arg(short, long)]
   pub update_allowed: bool,
 
+  /// Domain to IP mappings in the format domain=ip
   #[arg(value_parser = parse_domain_mapping, num_args = 0.., trailing_var_arg = true)]
   pub mappings: Vec<Mapping>,
 }

@@ -1,9 +1,9 @@
 [package]
 name = "dns-stub"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2024"
 authors = ["Ovidiu Ionescu <ovidiu@ionescu.net>"]
-description = "A DNS stub resolver. It will reply with the same IP address for all queries."
+description = "A DNS stub resolver. It can be configured with a list of domain=ip and for the rest will reply with a default IP address."
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
