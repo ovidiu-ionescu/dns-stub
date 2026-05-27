@@ -8,7 +8,7 @@ use std::io::Write;
 use std::net::UdpSocket;
 
 fn main() {
-  let args = Args::parse();
+  let args = Cli::parse();
   env_logger::init();
   server(&args.ip, args.port, &args.response_ip, &args.domain_suffix, &args.mappings);
 }
@@ -185,7 +185,7 @@ fn server(ip: &str, port: u16, initial_response_ip: &str, domain_suffix: &str, m
   }
 }
 
-use crate::cli::{Args, Mapping};
+use crate::cli::{Cli, Mapping};
 use crate::parse_request::{Name, parse_name};
 use libc::c_int;
 use libc::{PR_CAPBSET_DROP, prctl};
