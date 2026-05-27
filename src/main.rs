@@ -50,7 +50,6 @@ fn server(ip: &str, port: u16, initial_response_ip: &str, domain_suffix: &str, m
   let mut counter = 0;
   let mut default_response_ip = initial_response_ip.to_string();
 
-  //let mut database = std::collections::HashMap::<String, String>::new();
   let mut database: HashMap<String, String> = mappings.iter().map(|m| (m.domain.clone(), m.ip.to_string())).collect();
 
   loop {
@@ -64,7 +63,7 @@ fn server(ip: &str, port: u16, initial_response_ip: &str, domain_suffix: &str, m
       file.write_all(&buf[..amt]).unwrap();
     }
 
-    // toggle the QR bit
+    // toggle the QR bit, we will use the same buffer for the response
     buf[2] ^= 0b10000000;
 
     // get number of additional records
